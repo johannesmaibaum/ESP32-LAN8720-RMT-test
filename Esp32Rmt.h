@@ -34,16 +34,17 @@ class Esp32Rmt
     void send_NEC(uint32_t data, uint8_t repeats = 1);
 #endif  // SEND_NEC
 
+#if RECV_NEC
+    // Used to be private, moved here to be called after the Serial has been initialized
+    void _NEC_rx_init(void);
+#endif  // RECV_NEC
+
   private:
     gpio_num_t    _recv_pin;
     gpio_num_t    _send_pin;
     rmt_channel_t _recv_channel;
     rmt_channel_t _send_channel;
     bool          _receiving;
-
-#if RECV_NEC
-    void _NEC_rx_init(void);
-#endif  // RECV_NEC
 
 #if SEND_NEC
     void _NEC_tx_init(void);

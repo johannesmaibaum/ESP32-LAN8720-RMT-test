@@ -9,7 +9,8 @@ Esp32Rmt::Esp32Rmt(unsigned recv_pin, unsigned send_pin)
 {
 #if RECV_NEC
   received_data = 0;
-  _NEC_rx_init();
+  // Now called manually in setup():
+  //_NEC_rx_init();
 #endif  // RECV_NEC
 
 #if SEND_NEC

@@ -61,6 +61,7 @@ void WiFiEvent(WiFiEvent_t event)
 void setup()
 {
   Serial.begin(115200);
+  remote._NEC_rx_init();  // Used to be called automatically during object construction
   WiFi.onEvent(WiFiEvent);
   ETH.begin();
 
@@ -69,6 +70,7 @@ void setup()
   server.begin();
 
   // Initialize IR library
+  Serial.println("Trying to enable IR reception...");
   remote.enable_ir_reception();
 }
 

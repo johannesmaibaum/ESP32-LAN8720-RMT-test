@@ -1,4 +1,5 @@
 #include "Esp32Rmt.h"
+#include <esp_err.h>
 
 #define RMT_RX_ACTIVE_LEVEL 0
 
@@ -130,8 +131,10 @@ void Esp32Rmt::_NEC_rx_init(void)
   rmt_rx.rx_config.idle_threshold = rmt_item32_t_TIMEOUT_US
                                     / 10 * (RMT_TICK_10_US);
 
-  rmt_config(&rmt_rx);
-  rmt_driver_install(rmt_rx.channel, 1000, 0);
+  esp_err_t rmt_conf_rx_ret = rmt_config(&rmt_rx);
+  Serial.printf("Return value from rmt_config: %s\n", esp_err_to_name(rmt_conf_rx_ret));
+  esp_err_t rmt_drinst_rx_ret = rmt_driver_install(rmt_rx.channel, 1000, 0);
+  Serial.printf("Return value from RX rmt_driver_install: %s\n", esp_err_to_name(rmt_drinst_rx_ret));
 }
 
 bool Esp32Rmt::enable_ir_reception(void)
@@ -139,8 +142,11 @@ bool Esp32Rmt::enable_ir_reception(void)
   if (_receiving)  // No need to enable
     return true;
 
-  if (rmt_rx_start(_recv_channel, true) != ESP_OK)
+  esp_err_t rx_start_ret = rmt_rx_start(_recv_channel, true);
+  Serial.printf("Return value from rx_start_ret: %s\n", esp_err_to_name(rx_start_ret));
+  if (rx_start_ret != ESP_OK) {
     return false;
+  }
 
   _receiving = true;
   return true;
@@ -151,7 +157,9 @@ bool Esp32Rmt::disable_ir_reception(void)
   if (!_receiving)  // No need to disable
     return true;
 
-  if (rmt_rx_stop(_recv_channel) != ESP_OK)
+  esp_err_t rmt_rx_stop_ret = rmt_rx_stop(_recv_channel);
+  Serial.printf("Return value from rmt_rx_stop: %s\n", esp_err_to_name(rmt_rx_stop_ret));
+  if (rmt_rx_stop_ret != ESP_OK)
     return false;
 
   _receiving = false;
@@ -168,7 +176,8 @@ bool Esp32Rmt::recv_NEC(void)
 
   size_t rx_size = 0;
   RingbufHandle_t rb = nullptr;
-  rmt_get_ringbuf_handle(_recv_channel, &rb);
+  esp_err_t rb_hdl_ret = rmt_get_ringbuf_handle(_recv_channel, &rb);
+  Serial.printf("Return value from rmt_get_ringbuf_handle: %s\n", esp_err_to_name(rb_hdl_ret));
   if (rb) {
     rmt_item32_t *item = static_cast<rmt_item32_t*>(xRingbufferReceive(
         rb, &rx_size, 1000));
